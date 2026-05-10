@@ -74,3 +74,10 @@ model Verification {
   @@index([identifier])
   @@map("verification")
 }
+
+model Workflows {
+  id   String @id @default(cuid())
+  name String
+
+  @@map("workflows")
+}

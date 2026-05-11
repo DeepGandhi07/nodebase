@@ -7,7 +7,15 @@ import { toast } from "sonner";
 const Page = () => {
   const trpc = useTRPC();
   const { data } = useQuery(trpc.getWorkflows.queryOptions());
-  const queryClient = useQueryClient();
+
+  const testAI = useMutation(
+    trpc.testAi.mutationOptions({
+      onSuccess: () => {
+        toast.success("Job Queued");
+      },
+    }),
+  );
+
   const create = useMutation(
     trpc.createWorkflow.mutationOptions({
       onSuccess: () => {
@@ -15,10 +23,14 @@ const Page = () => {
       },
     }),
   );
+
   return (
     <div className="min-h-screen min-w-screen flex flex-col  items-center justify-center gap-y-3">
       <div>Protected Page</div>
       <div>{JSON.stringify(data)}</div>
+      <Button disabled={testAI.isPending} onClick={() => testAI.mutate()}>
+        Test AI
+      </Button>
       <Button disabled={create.isPending} onClick={() => create.mutate()}>
         Create Workflow
       </Button>

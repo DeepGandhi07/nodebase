@@ -1,26 +1,47 @@
-import prisma from "@/lib/db";
+import { generateText } from "ai";
 import { inngest } from "./client";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
 
-export const processTask = inngest.createFunction(
-  { id: "process-task", triggers: { event: "app/task.created" } },
+const google = createGoogleGenerativeAI();
+const openai = createOpenAI();
+const anthropic = createAnthropic();
+
+export const execute = inngest.createFunction(
+  { id: "execute-ai", triggers: { event: "execute/ai" } },
+
   async ({ event, step }) => {
-    // Fetching the Video
-    await step.sleep("Fetching", "5s");
+    await step.sleep("pretend", "5s");
+    const { steps: GeminiSteps } = await step.ai.wrap(
+      "gemini-generate-text",
+      generateText,
+      {
+        system: "You are a helpful assistant for generating text.",
+        prompt: "What is 2+2?",
+        model: google("gemini-2.5-flash"),
+      },
+    );
 
-    // Transcribing the Video
-    await step.sleep("Transcribing", "5s");
+    const { steps: openaiSteps } = await step.ai.wrap(
+      "openai-generate-text",
+      generateText,
+      {
+        system: "You are a helpful assistant for generating text.",
+        prompt: "What is 2+2?",
+        model: openai("gpt-4.1"),
+      },
+    );
 
-    // Sending Transcription to openAI
-    await step.sleep("Sending to openAI", "5s");
-
-    await step.run("Create Task", async () => {
-      return prisma.workflows.create({
-        data: {
-          name: `Workflow from Inngest - ${event.data.email}`,
-        },
-      });
-    });
-
-    return { message: `Task ${event.data.email} complete` };
+    const { steps: anthropicSteps } = await step.ai.wrap(
+      "anthropic-generate-text",
+      generateText,
+      {
+        system: "You are a helpful assistant for generating text.",
+        prompt: "What is 2+2?",
+        model: anthropic("claude-sonnet-4-5"),
+      },
+    );
+    return { GeminiSteps, openaiSteps, anthropicSteps };
   },
 );

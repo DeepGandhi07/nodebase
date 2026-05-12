@@ -3,6 +3,7 @@ import { inngest } from "./client";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import * as Sentry from "@sentry/nextjs";
 
 const google = createGoogleGenerativeAI();
 const openai = createOpenAI();
@@ -13,6 +14,14 @@ export const execute = inngest.createFunction(
 
   async ({ event, step }) => {
     await step.sleep("pretend", "5s");
+
+    Sentry.logger.info("User triggered test log", {
+      log_source: "sentry_test",
+    });
+
+    console.warn("Something is missing");
+    console.error("This is an error i want to track");
+
     const { steps: GeminiSteps } = await step.ai.wrap(
       "gemini-generate-text",
       generateText,
@@ -20,6 +29,12 @@ export const execute = inngest.createFunction(
         system: "You are a helpful assistant for generating text.",
         prompt: "What is 2+2?",
         model: google("gemini-2.5-flash"),
+
+        experimental_telemetry: {
+          isEnabled: true,
+          recordInputs: true,
+          recordOutputs: true,
+        },
       },
     );
 
@@ -30,6 +45,11 @@ export const execute = inngest.createFunction(
         system: "You are a helpful assistant for generating text.",
         prompt: "What is 2+2?",
         model: openai("gpt-4.1"),
+        experimental_telemetry: {
+          isEnabled: true,
+          recordInputs: true,
+          recordOutputs: true,
+        },
       },
     );
 
@@ -40,6 +60,11 @@ export const execute = inngest.createFunction(
         system: "You are a helpful assistant for generating text.",
         prompt: "What is 2+2?",
         model: anthropic("claude-sonnet-4-5"),
+        experimental_telemetry: {
+          isEnabled: true,
+          recordInputs: true,
+          recordOutputs: true,
+        },
       },
     );
     return { GeminiSteps, openaiSteps, anthropicSteps };

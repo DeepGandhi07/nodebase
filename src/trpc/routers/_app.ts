@@ -1,23 +1,19 @@
-import prisma from "@/lib/db";
-import { createTRPCRouter, protectedProcedure } from "../init";
 import { inngest } from "@/inngest/client";
-import { google } from "@ai-sdk/google";
-import { generateText } from "ai";
-import { TRPCError } from "@trpc/server";
+import prisma from "@/lib/db";
+import {
+  createTRPCRouter,
+  premiumProcedure,
+  protectedProcedure,
+} from "../init";
 
 export const appRouter = createTRPCRouter({
   testAi: protectedProcedure.mutation(async () => {
-    // throw new TRPCError({
-    //   code: "BAD_REQUEST",
-    //   message: "Something went wrong",
-    // });
-
     await inngest.send({
       name: "execute/ai",
     });
     return { success: true, message: "AI Executed" };
   }),
-  getWorkflows: protectedProcedure.query(({ ctx }) => {
+  getWorkflows: premiumProcedure.query(({ ctx }) => {
     return prisma.workflows.findMany();
   }),
   createWorkflow: protectedProcedure.mutation(async () => {

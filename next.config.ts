@@ -2,9 +2,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  devIndicators: {
-    position: "bottom-right",
-  },
+  devIndicators: false,
   async redirects() {
     return [
       {

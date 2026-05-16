@@ -110,3 +110,11 @@ WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  h
 WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  h
 WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  h
 WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  h

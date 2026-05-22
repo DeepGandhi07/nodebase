@@ -131,3 +131,10 @@ WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  l
 WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  h
 WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  h
 WARN [lib::vt100::screen] CSI not implemented: ESC [ 8;19;125  t
+ERROR [lib::error] Error: Overlapped I/O operation is in progress. (0x800703E5)
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  l
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  l
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?9001  h
+WARN [lib::vt100::screen] CSI not implemented: ESC [ ?1004  h

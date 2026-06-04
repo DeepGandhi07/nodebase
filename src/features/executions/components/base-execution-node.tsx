@@ -6,11 +6,11 @@ import { BaseHandle } from "@/components/react-flow/base-handle";
 import { LucideIcon } from "lucide-react";
 import { memo, ReactNode } from "react";
 import Image from "next/image";
-import WorkflowNode from "../../components/workflow-node";
 import {
   NodeStatus,
   NodeStatusIndicator,
 } from "@/components/react-flow/node-status-indicator";
+import WorkflowNode from "@/components/workflow-node";
 
 interface BaseExecutionNodeProps extends NodeProps {
   icon: LucideIcon | string;

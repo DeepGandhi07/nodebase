@@ -6,12 +6,22 @@ export const manualTriggerExecutor: NodeExecutor<ManualTriggerData> = async ({
   nodeId,
   context,
   step,
+  manualCh,
 }) => {
-  // TODO: Publish "loading" state for manual trigger
+  await step.realtime.publish(`${nodeId}-loading`, manualCh.status, {
+    nodeId,
+    status: "loading",
+  });
 
-  const result = await step.run("manual-trigger", async () => context);
+  const result = await step.run(
+    `manual-trigger-${nodeId}`,
+    async () => context,
+  );
 
-  // TODO: Publish "success" state for manual trigger
+  await step.realtime.publish(`${nodeId}-success`, manualCh.status, {
+    nodeId,
+    status: "success",
+  });
 
   return result;
 };

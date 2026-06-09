@@ -51,45 +51,52 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     });
     throw new NonRetriableError("HTTP Request node: Method not configured");
   }
+  try {
+    const result = await step.run(`http-request-${nodeId}`, async () => {
+      const endpoint = Handlebars.compile(data.endpoint)(context);
+      const method = data.method;
 
-  const result = await step.run(`http-request-${nodeId}`, async () => {
-    const endpoint = Handlebars.compile(data.endpoint)(context);
-    const method = data.method;
+      const options: KyOptions = { method };
 
-    const options: KyOptions = { method };
+      if (["POST", "PUT", "PATCH"].includes(method)) {
+        const resolved = Handlebars.compile(data.body || "{}")(context);
+        console.log("BODYYYYYYYY", resolved);
+        JSON.parse(resolved);
+        options.body = resolved;
+        options.headers = {
+          "Content-Type": "application/json",
+        };
+      }
 
-    if (["POST", "PUT", "PATCH"].includes(method)) {
-      const resolved = Handlebars.compile(data.body || "{}")(context);
-      console.log("BODYYYYYYYY", resolved);
-      JSON.parse(resolved);
-      options.body = resolved;
-      options.headers = {
-        "Content-Type": "application/json",
-      };
-    }
+      const response = await ky(endpoint, options);
+      const contentType = response.headers.get("content-type");
+      const responseData = contentType?.includes("application/json")
+        ? await response.json()
+        : await response.text();
 
-    const response = await ky(endpoint, options);
-    const contentType = response.headers.get("content-type");
-    const responseData = contentType?.includes("application/json")
-      ? await response.json()
-      : await response.text();
-
-    return {
-      ...context,
-      [data.variableName]: {
-        httpResponse: {
-          status: response.status,
-          statusText: response.statusText,
-          data: responseData,
+      return {
+        ...context,
+        [data.variableName]: {
+          httpResponse: {
+            status: response.status,
+            statusText: response.statusText,
+            data: responseData,
+          },
         },
-      },
-    };
-  });
+      };
+    });
 
-  await step.realtime.publish(`${nodeId}-success`, httpCh.status, {
-    nodeId,
-    status: "success",
-  });
+    await step.realtime.publish(`${nodeId}-success`, httpCh.status, {
+      nodeId,
+      status: "success",
+    });
 
-  return result;
+    return result;
+  } catch (error) {
+    await step.realtime.publish(`${nodeId}-success`, httpCh.status, {
+      nodeId,
+      status: "error",
+    });
+    throw error;
+  }
 };

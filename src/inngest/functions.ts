@@ -2,18 +2,30 @@ import { NonRetriableError } from "inngest";
 import { inngest } from "./client";
 import prisma from "@/lib/db";
 import { topologicalSort } from "./utils";
-import { NodeType } from "@/generated/prisma/enums";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
+import { httpRequestChannel } from "./channels/http-request";
+import { NodeType } from "@/generated/prisma/enums";
+import { manualTriggerChannel } from "./channels/manual-trigger";
 
 export const executeWorkflow = inngest.createFunction(
-  { id: "execute-workflow", triggers: { event: "workflows/execute.workflow" } },
-
+  {
+    id: "execute-workflow",
+    retries: 0,
+    triggers: [{ event: "workflows/execute.workflow" }],
+  },
   async ({ event, step }) => {
-    const workflowId = event.data.workflowId;
+    const { workflowId, correlationId } = event.data;
 
     if (!workflowId) {
       throw new NonRetriableError("Workflow ID is missing");
     }
+
+    if (!correlationId) {
+      throw new NonRetriableError("Correlation ID is missing");
+    }
+
+    const httpCh = httpRequestChannel({ correlationId });
+    const manualCh = manualTriggerChannel({ correlationId });
 
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await prisma.workflows.findUniqueOrThrow({
@@ -23,14 +35,11 @@ export const executeWorkflow = inngest.createFunction(
           connections: true,
         },
       });
-
       return topologicalSort(workflow.nodes, workflow.connections);
     });
 
-    // Initialize context with any initial data from the trigger
     let context = event.data.initialData || {};
 
-    // Execute each node
     for (const node of sortedNodes) {
       const executor = getExecutor(node.type as NodeType);
       context = await executor({
@@ -38,8 +47,11 @@ export const executeWorkflow = inngest.createFunction(
         nodeId: node.id,
         context,
         step,
+        httpCh,
+        manualCh,
       });
     }
+
     return {
       workflowId,
       result: context,

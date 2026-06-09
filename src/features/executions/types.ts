@@ -1,17 +1,17 @@
-import type { GetStepTools, Inngest } from "inngest";
+import type { httpRequestChannel } from "@/inngest/channels/http-request";
+import type { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
 
-export type WorkflowContext = Record<string, unknown>;
+type ChannelInstance<T extends (...args: any) => any> = ReturnType<T>;
 
-export type StepTools = GetStepTools<Inngest.Any>;
-
-export interface NodeExecutorParams<TData = Record<string, unknown>> {
+export type NodeExecutorParams<TData> = {
   data: TData;
   nodeId: string;
-  context: WorkflowContext;
-  step: StepTools;
-  // publish: TODO Add realtime later
-}
+  context: Record<string, unknown>;
+  step: any;
+  httpCh: ChannelInstance<typeof httpRequestChannel>;
+  manualCh: ChannelInstance<typeof manualTriggerChannel>;
+};
 
-export type NodeExecutor<TData = Record<string, unknown>> = (
+export type NodeExecutor<TData> = (
   params: NodeExecutorParams<TData>,
-) => Promise<WorkflowContext>;
+) => Promise<Record<string, unknown>>;

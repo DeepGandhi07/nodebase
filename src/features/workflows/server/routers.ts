@@ -13,21 +13,18 @@ import { inngest } from "@/inngest/client";
 
 export const workflowsRouter = createTRPCRouter({
   execute: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), correlationId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const workflow = await prisma.workflows.findUniqueOrThrow({
-        where: {
-          id: input.id,
-          userId: ctx.auth.user.id,
-        },
+        where: { id: input.id, userId: ctx.auth.user.id },
       });
 
-      await inngest.send({
+      const result = await inngest.send({
         name: "workflows/execute.workflow",
-        data: { workflowId: input.id },
+        data: { workflowId: input.id, correlationId: input.correlationId },
       });
 
-      return workflow;
+      return { workflow, runId: result.ids[0] };
     }),
 
   create: premiumProcedure.mutation(({ ctx }) => {

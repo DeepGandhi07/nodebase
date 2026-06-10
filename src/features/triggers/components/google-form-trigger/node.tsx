@@ -8,6 +8,7 @@ import { GoogleFormTriggerDialog } from "./dialog";
 
 type GoogleFormTriggerNodeData = {
   runId?: string;
+  workflowId?: string;
 };
 
 type GoogleFormTriggerNodeType = Node<GoogleFormTriggerNodeData>;
@@ -18,15 +19,15 @@ export const GoogleFormTrigger = memo(
 
     const channel = useMemo(
       () =>
-        props.data.runId
-          ? googleFormTriggerChannel({ correlationId: props.data.runId })
+        props.data.workflowId
+          ? googleFormTriggerChannel({ workflowId: props.data.workflowId })
           : null,
-      [props.data.runId],
+      [props.data.workflowId],
     );
 
     const refreshToken = useCallback(
-      () => fetchGoogleFormTriggerRealtimeToken(props.data.runId!),
-      [props.data.runId],
+      () => fetchGoogleFormTriggerRealtimeToken(props.data.workflowId!),
+      [props.data.workflowId],
     );
 
     const nodeStatus = useNodeStatus({

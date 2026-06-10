@@ -2,8 +2,8 @@ import { realtime } from "inngest";
 import { z } from "zod";
 
 export const httpRequestChannel = realtime.channel({
-  name: ({ correlationId }: { correlationId: string }) =>
-    `http-request-execution:${correlationId}`,
+  name: ({ workflowId }: { workflowId: string }) =>
+    `http-request-execution:${workflowId}`,
   topics: {
     status: {
       schema: z.object({

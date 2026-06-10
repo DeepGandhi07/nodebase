@@ -25,9 +25,9 @@ export const executeWorkflow = inngest.createFunction(
       throw new NonRetriableError("Correlation ID is missing");
     }
 
-    const httpCh = httpRequestChannel({ correlationId });
+    const httpCh = httpRequestChannel({ workflowId });
     const manualCh = manualTriggerChannel({ correlationId });
-    const googleFormCh = googleFormTriggerChannel({ correlationId });
+    const googleFormCh = googleFormTriggerChannel({ workflowId });
 
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await prisma.workflows.findUniqueOrThrow({

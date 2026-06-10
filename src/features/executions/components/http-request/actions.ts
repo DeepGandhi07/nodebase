@@ -4,9 +4,9 @@ import { getClientSubscriptionToken } from "inngest/react";
 import { inngest } from "@/inngest/client";
 import { httpRequestChannel } from "@/inngest/channels/http-request";
 
-export async function fetchHttpRequestRealtimeToken(correlationId: string) {
+export async function fetchHttpRequestRealtimeToken(workflowId: string) {
   return getClientSubscriptionToken(inngest, {
-    channel: httpRequestChannel({ correlationId }),
+    channel: httpRequestChannel({ workflowId }),
     topics: ["status"],
   });
 }

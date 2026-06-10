@@ -2,8 +2,8 @@ import { realtime } from "inngest";
 import { z } from "zod";
 
 export const googleFormTriggerChannel = realtime.channel({
-  name: ({ correlationId }: { correlationId: string }) =>
-    `google-form-execution:${correlationId}`,
+  name: ({ workflowId }: { workflowId: string }) =>
+    `google-form-execution:${workflowId}`,
   topics: {
     status: {
       schema: z.object({

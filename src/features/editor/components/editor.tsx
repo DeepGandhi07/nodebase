@@ -39,7 +39,15 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
 
   const setEditor = useSetAtom(editorAtom);
 
-  const [nodes, setNodes] = useState<Node[]>(workflow.nodes);
+  const [nodes, setNodes] = useState<Node[]>(
+    workflow.nodes.map((node) => ({
+      ...node,
+      data: {
+        ...node.data,
+        workflowId,
+      },
+    })),
+  );
   const [edges, setEdges] = useState<Edge[]>(workflow.edges);
 
   const onNodesChange = useCallback(

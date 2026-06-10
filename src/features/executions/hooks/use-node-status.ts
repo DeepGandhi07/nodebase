@@ -4,10 +4,12 @@ import type { NodeStatus } from "@/components/react-flow/node-status-indicator";
 import type { httpRequestChannel } from "@/inngest/channels/http-request";
 import type { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
 import type { getClientSubscriptionToken } from "inngest/react";
+import type { googleFormTriggerChannel } from "@/inngest/channels/google-form-trigger";
 
 type AnyChannel =
   | ReturnType<typeof httpRequestChannel>
-  | ReturnType<typeof manualTriggerChannel>;
+  | ReturnType<typeof manualTriggerChannel>
+  | ReturnType<typeof googleFormTriggerChannel>;
 
 interface UseNodeStatusOptions {
   nodeId: string;
@@ -26,7 +28,7 @@ export function useNodeStatus({
 
   const topics = ["status"] as const;
 
-  const { messages, connectionStatus } = useRealtime({
+  const { messages, connectionStatus, error } = useRealtime({
     channel: channel!,
     topics,
     token: refreshToken,
@@ -34,13 +36,15 @@ export function useNodeStatus({
   });
 
   useEffect(() => {
-    console.log(
-      "[useNodeStatus] connectionStatus:",
+    console.log("[useNodeStatus]", {
+      nodeId,
+      channelName: (channel as any)?.name,
       connectionStatus,
-      "messages:",
-      messages.all?.length,
-    );
-  }, [connectionStatus, messages.all?.length]);
+      error,
+      messagesCount: messages.all?.length,
+      byTopic: messages.byTopic.status,
+    });
+  }, [connectionStatus, messages.all?.length, error]);
 
   useEffect(() => {
     if (!messages.all?.length) return;

@@ -4,11 +4,9 @@ import { getClientSubscriptionToken } from "inngest/react";
 import { inngest } from "@/inngest/client";
 import { googleFormTriggerChannel } from "@/inngest/channels/google-form-trigger";
 
-export async function fetchGoogleFormTriggerRealtimeToken(
-  correlationId: string,
-) {
+export async function fetchGoogleFormTriggerRealtimeToken(workflowId: string) {
   return getClientSubscriptionToken(inngest, {
-    channel: googleFormTriggerChannel({ correlationId }),
+    channel: googleFormTriggerChannel({ workflowId }),
     topics: ["status"],
   });
 }

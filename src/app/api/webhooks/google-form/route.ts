@@ -1,4 +1,5 @@
 import { sendWorkflowExecution } from "@/inngest/utils";
+import { randomUUID } from "crypto";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -31,10 +32,12 @@ export async function POST(request: NextRequest) {
     // Trigger an Inngest job
     await sendWorkflowExecution({
       workflowId,
+      correlationId: randomUUID(), // webhook-triggered runs get their own correlationId
       initialData: {
         googleForm: formData,
       },
     });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Google form webhook error:", error);
     return NextResponse.json(

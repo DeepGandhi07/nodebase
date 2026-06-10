@@ -14,7 +14,7 @@ type HttpRequestNodeData = {
   endpoint?: string;
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: string;
-  runId?: string;
+  workflowId?: string;
 };
 
 type HttpRequestNodeType = Node<HttpRequestNodeData>;
@@ -25,15 +25,15 @@ export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
 
   const channel = useMemo(
     () =>
-      props.data.runId
-        ? httpRequestChannel({ correlationId: props.data.runId })
+      props.data.workflowId
+        ? httpRequestChannel({ workflowId: props.data.workflowId })
         : null,
-    [props.data.runId],
+    [props.data.workflowId],
   );
 
   const refreshToken = useCallback(
-    () => fetchHttpRequestRealtimeToken(props.data.runId!),
-    [props.data.runId],
+    () => fetchHttpRequestRealtimeToken(props.data.workflowId!),
+    [props.data.workflowId],
   );
 
   const nodeStatus = useNodeStatus({

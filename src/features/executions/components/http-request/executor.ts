@@ -8,9 +8,9 @@ Handlebars.registerHelper("json", (context) => {
 });
 
 type HttpRequestData = {
-  variableName: string;
-  endpoint: string;
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  variableName?: string;
+  endpoint?: string;
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: string;
 };
 
@@ -26,33 +26,36 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     status: "loading",
   });
 
-  if (!data.endpoint) {
-    await step.realtime.publish(`${nodeId}-error`, httpCh.status, {
-      nodeId,
-      status: "error",
-    });
-    throw new NonRetriableError("HTTP Request node: No endpoint configured");
-  }
-
-  if (!data.variableName) {
-    await step.realtime.publish(`${nodeId}-error`, httpCh.status, {
-      nodeId,
-      status: "error",
-    });
-    throw new NonRetriableError(
-      "HTTP Request node: Variable name not configured",
-    );
-  }
-
-  if (!data.method) {
-    await step.realtime.publish(`${nodeId}-error`, httpCh.status, {
-      nodeId,
-      status: "error",
-    });
-    throw new NonRetriableError("HTTP Request node: Method not configured");
-  }
   try {
     const result = await step.run(`http-request-${nodeId}`, async () => {
+      if (!data.endpoint) {
+        await step.realtime.publish(`${nodeId}-error`, httpCh.status, {
+          nodeId,
+          status: "error",
+        });
+        throw new NonRetriableError(
+          "HTTP Request node: No endpoint configured",
+        );
+      }
+
+      if (!data.variableName) {
+        await step.realtime.publish(`${nodeId}-error`, httpCh.status, {
+          nodeId,
+          status: "error",
+        });
+        throw new NonRetriableError(
+          "HTTP Request node: Variable name not configured",
+        );
+      }
+
+      if (!data.method) {
+        await step.realtime.publish(`${nodeId}-error`, httpCh.status, {
+          nodeId,
+          status: "error",
+        });
+        throw new NonRetriableError("HTTP Request node: Method not configured");
+      }
+
       const endpoint = Handlebars.compile(data.endpoint)(context);
       const method = data.method;
 
@@ -74,15 +77,17 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
         ? await response.json()
         : await response.text();
 
+      const responsePayload = {
+        httpResponse: {
+          status: response.status,
+          statusText: response.statusText,
+          data: responseData,
+        },
+      };
+
       return {
         ...context,
-        [data.variableName]: {
-          httpResponse: {
-            status: response.status,
-            statusText: response.statusText,
-            data: responseData,
-          },
-        },
+        [data.variableName]: responsePayload,
       };
     });
 

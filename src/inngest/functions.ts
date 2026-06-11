@@ -7,6 +7,7 @@ import { httpRequestChannel } from "./channels/http-request";
 import { NodeType } from "@/generated/prisma/enums";
 import { manualTriggerChannel } from "./channels/manual-trigger";
 import { googleFormTriggerChannel } from "./channels/google-form-trigger";
+import { stripeTriggerChannel } from "./channels/stripe-trigger";
 
 export const executeWorkflow = inngest.createFunction(
   {
@@ -28,6 +29,7 @@ export const executeWorkflow = inngest.createFunction(
     const httpCh = httpRequestChannel({ workflowId });
     const manualCh = manualTriggerChannel({ correlationId });
     const googleFormCh = googleFormTriggerChannel({ workflowId });
+    const stripeCh = stripeTriggerChannel({ workflowId });
 
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await prisma.workflows.findUniqueOrThrow({
@@ -52,6 +54,7 @@ export const executeWorkflow = inngest.createFunction(
         httpCh,
         manualCh,
         googleFormCh,
+        stripeCh,
       });
     }
 

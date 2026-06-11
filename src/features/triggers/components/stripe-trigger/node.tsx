@@ -1,32 +1,32 @@
 import { useNodeStatus } from "@/features/executions/hooks/use-node-status";
-import { googleFormTriggerChannel } from "@/inngest/channels/google-form-trigger";
+import { stripeTriggerChannel } from "@/inngest/channels/stripe-trigger";
 import { type Node, type NodeProps } from "@xyflow/react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { BaseTriggerNode } from "../base-trigger-node";
-import { fetchGoogleFormTriggerRealtimeToken } from "./actions";
-import { GoogleFormTriggerDialog } from "./dialog";
+import { fetchStripeTriggerRealtimeToken } from "./actions";
+import { StripeTriggerDialog } from "./dialog";
 
-type GoogleFormTriggerNodeData = {
+type StripeTriggerNodeData = {
   runId?: string;
   workflowId?: string;
 };
 
-type GoogleFormTriggerNodeType = Node<GoogleFormTriggerNodeData>;
+type StripeTriggerNodeType = Node<StripeTriggerNodeData>;
 
-export const GoogleFormTriggerNode = memo(
-  (props: NodeProps<GoogleFormTriggerNodeType>) => {
+export const StripeTriggerNode = memo(
+  (props: NodeProps<StripeTriggerNodeType>) => {
     const [dialogOpen, setDialogOpen] = useState(false);
 
     const channel = useMemo(
       () =>
         props.data.workflowId
-          ? googleFormTriggerChannel({ workflowId: props.data.workflowId })
+          ? stripeTriggerChannel({ workflowId: props.data.workflowId })
           : null,
       [props.data.workflowId],
     );
 
     const refreshToken = useCallback(
-      () => fetchGoogleFormTriggerRealtimeToken(props.data.workflowId!),
+      () => fetchStripeTriggerRealtimeToken(props.data.workflowId!),
       [props.data.workflowId],
     );
 
@@ -40,15 +40,12 @@ export const GoogleFormTriggerNode = memo(
 
     return (
       <>
-        <GoogleFormTriggerDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-        />
+        <StripeTriggerDialog open={dialogOpen} onOpenChange={setDialogOpen} />
         <BaseTriggerNode
           {...props}
-          icon="/logos/googleform.svg"
-          name="Google Form"
-          description="When form is submitted"
+          icon="/logos/stripe.svg"
+          name="Stripe"
+          description="When stripe event is captured"
           status={nodeStatus}
           onSettings={handleOpenSettings}
           onDoubleClick={handleOpenSettings}
@@ -58,4 +55,4 @@ export const GoogleFormTriggerNode = memo(
   },
 );
 
-GoogleFormTriggerNode.displayName = "GoogleFormTrigger";
+StripeTriggerNode.displayName = "StripeTrigger";

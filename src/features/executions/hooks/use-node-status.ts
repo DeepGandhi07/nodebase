@@ -5,11 +5,15 @@ import type { httpRequestChannel } from "@/inngest/channels/http-request";
 import type { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
 import type { getClientSubscriptionToken } from "inngest/react";
 import type { googleFormTriggerChannel } from "@/inngest/channels/google-form-trigger";
+import { geminiChannel } from "@/inngest/channels/gemini";
+import { OpenAIChannel } from "@/inngest/channels/open-ai";
 
 type AnyChannel =
   | ReturnType<typeof httpRequestChannel>
   | ReturnType<typeof manualTriggerChannel>
-  | ReturnType<typeof googleFormTriggerChannel>;
+  | ReturnType<typeof googleFormTriggerChannel>
+  | ReturnType<typeof geminiChannel>
+  | ReturnType<typeof OpenAIChannel>;
 
 interface UseNodeStatusOptions {
   nodeId: string;

@@ -4,6 +4,9 @@ import { StripeTriggerExecutor } from "@/features/triggers/components/stripe-tri
 import { NodeType } from "@/generated/prisma/enums";
 import { httpRequestExecutor } from "../components/http-request/executor";
 import { NodeExecutor, NodeExecutorParams, WorkflowContext } from "../types";
+import { GeminiExecutor } from "../components/gemini/executor";
+import { OpenAiExecutor } from "../components/openai/executor";
+import { AnthropicExecutor } from "../components/anthropic/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
   [NodeType.INITIAL]: manualTriggerExecutor,
@@ -11,9 +14,9 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
   [NodeType.HTTP_REQUEST]: httpRequestExecutor,
   [NodeType.GOOGLE_FORM_TRIGGER]: GoogleFormTriggerExecutor,
   [NodeType.STRIPE_TRIGGER]: StripeTriggerExecutor,
-  // [NodeType.ANTHROPIC]: "",
-  // [NodeType.GEMINI]: "",
-  // [NodeType.OPENAI]: "",
+  [NodeType.GEMINI]: GeminiExecutor,
+  [NodeType.OPENAI]: OpenAiExecutor,
+  [NodeType.ANTHROPIC]: AnthropicExecutor,
   // [NodeType.DISCORD]: "",
   // [NodeType.SLACK]: "",
 };

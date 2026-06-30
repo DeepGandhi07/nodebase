@@ -13,6 +13,7 @@ type OpenAiNodeData = {
   systemPrompt: string;
   userPrompt?: string;
   workflowId?: string;
+  credentialId: string;
 };
 
 type OpenAiNodeType = Node<OpenAiNodeData>;

@@ -1,19 +1,19 @@
 "use client";
 
+import { AnthropicChannel } from "@/inngest/channels/anthropic";
 import { useReactFlow, type Node, type NodeProps } from "@xyflow/react";
-import { GlobeIcon } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useNodeStatus } from "../../hooks/use-node-status";
 import { BaseExecutionNode } from "../base-execution-node";
 import { fetchAnthropicRealtimeToken } from "./actions";
 import { AnthropicDialog, AnthropicFormValues } from "./dialog";
-import { AnthropicChannel } from "@/inngest/channels/anthropic";
 
 type AnthropicNodeData = {
   variableName?: string;
   systemPrompt: string;
   userPrompt?: string;
   workflowId?: string;
+  credentialId: string;
 };
 
 type AnthropicNodeType = Node<AnthropicNodeData>;

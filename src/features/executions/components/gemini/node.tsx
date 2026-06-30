@@ -1,16 +1,16 @@
 "use client";
 
+import { geminiChannel } from "@/inngest/channels/gemini";
 import { useReactFlow, type Node, type NodeProps } from "@xyflow/react";
-import { GlobeIcon } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useNodeStatus } from "../../hooks/use-node-status";
 import { BaseExecutionNode } from "../base-execution-node";
 import { fetchGeminiRealtimeToken } from "./actions";
 import { GeminiDialog, GeminiFormValues } from "./dialog";
-import { geminiChannel } from "@/inngest/channels/gemini";
 
 type GeminiNodeData = {
   variableName?: string;
+  credentialId: string;
   systemPrompt: string;
   userPrompt?: string;
   workflowId?: string;
@@ -52,7 +52,6 @@ export const GeminiNode = memo((props: NodeProps<geminiNodeType>) => {
             data: {
               ...node.data,
               ...values,
-              // runId: undefined,
             },
           };
         }

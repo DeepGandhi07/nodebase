@@ -7,13 +7,17 @@ import type { getClientSubscriptionToken } from "inngest/react";
 import type { googleFormTriggerChannel } from "@/inngest/channels/google-form-trigger";
 import { geminiChannel } from "@/inngest/channels/gemini";
 import { OpenAIChannel } from "@/inngest/channels/open-ai";
+import { discordChannel } from "@/inngest/channels/discord";
+import { SlackChannel } from "@/inngest/channels/slack";
 
 type AnyChannel =
   | ReturnType<typeof httpRequestChannel>
   | ReturnType<typeof manualTriggerChannel>
   | ReturnType<typeof googleFormTriggerChannel>
   | ReturnType<typeof geminiChannel>
-  | ReturnType<typeof OpenAIChannel>;
+  | ReturnType<typeof OpenAIChannel>
+  | ReturnType<typeof discordChannel>
+  | ReturnType<typeof SlackChannel>;
 
 interface UseNodeStatusOptions {
   nodeId: string;

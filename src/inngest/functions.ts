@@ -10,6 +10,9 @@ import { googleFormTriggerChannel } from "./channels/google-form-trigger";
 import { stripeTriggerChannel } from "./channels/stripe-trigger";
 import { geminiChannel } from "./channels/gemini";
 import { OpenAIChannel } from "./channels/open-ai";
+import { AnthropicChannel } from "./channels/anthropic";
+import { discordChannel } from "./channels/discord";
+import { SlackChannel } from "./channels/slack";
 
 export const executeWorkflow = inngest.createFunction(
   {
@@ -34,6 +37,9 @@ export const executeWorkflow = inngest.createFunction(
     const stripeCh = stripeTriggerChannel({ workflowId });
     const geminiCh = geminiChannel({ workflowId });
     const openAiCh = OpenAIChannel({ workflowId });
+    const anthropicCh = AnthropicChannel({ workflowId });
+    const discordCh = discordChannel({ workflowId });
+    const slackCh = SlackChannel({ workflowId });
 
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await prisma.workflows.findUniqueOrThrow({
@@ -46,12 +52,21 @@ export const executeWorkflow = inngest.createFunction(
       return topologicalSort(workflow.nodes, workflow.connections);
     });
 
+    const userId = await step.run("find-user-id", async () => {
+      const workflow = await prisma.workflows.findFirstOrThrow({
+        where: { id: workflowId },
+        select: { userId: true },
+      });
+      return workflow.userId;
+    });
+
     let context = event.data.initialData || {};
 
     for (const node of sortedNodes) {
       const executor = getExecutor(node.type as NodeType);
       context = await executor({
         data: node.data as Record<string, unknown>,
+        userId,
         nodeId: node.id,
         context,
         step,
@@ -61,6 +76,9 @@ export const executeWorkflow = inngest.createFunction(
         stripeCh,
         geminiCh,
         openAiCh,
+        anthropicCh,
+        discordCh,
+        slackCh,
       });
     }
 

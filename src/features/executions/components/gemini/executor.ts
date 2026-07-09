@@ -1,5 +1,6 @@
 import type { NodeExecutor } from "@/features/executions/types";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
 import Handlebars from "handlebars";
@@ -76,7 +77,7 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({
   }
 
   const google = createGoogleGenerativeAI({
-    apiKey: credential.value,
+    apiKey: decrypt(credential.value),
   });
 
   try {

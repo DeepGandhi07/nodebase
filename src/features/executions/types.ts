@@ -7,9 +7,12 @@ import type { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
 import { OpenAIChannel } from "@/inngest/channels/open-ai";
 import { SlackChannel } from "@/inngest/channels/slack";
 import { stripeTriggerChannel } from "@/inngest/channels/stripe-trigger";
+import { GetStepTools, Inngest } from "inngest";
 
 type ChannelInstance<T extends (...args: any) => any> = ReturnType<T>;
 export type WorkflowContext = Record<string, unknown>;
+
+export type StepTools = GetStepTools<Inngest.Any>;
 
 export interface NodeExecutorParams<TData = Record<string, unknown>> {
   data: TData;

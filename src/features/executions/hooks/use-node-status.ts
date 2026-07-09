@@ -57,20 +57,17 @@ export function useNodeStatus({
   useEffect(() => {
     if (!messages.all?.length) return;
 
-    const latestMessage = [...messages.all]
-      .filter(
-        (msg) =>
-          msg.kind === "data" &&
-          msg.topic === "status" &&
-          msg.data.nodeId === nodeId,
-      )
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )[0];
+    const matching = messages.all.filter(
+      (msg) =>
+        msg.kind === "data" &&
+        msg.topic === "status" &&
+        (msg.data as { nodeId: string }).nodeId === nodeId,
+    );
+
+    const latestMessage = matching[matching.length - 1];
 
     if (latestMessage?.kind === "data") {
-      setStatus(latestMessage.data.status as NodeStatus);
+      setStatus((latestMessage.data as { status: NodeStatus }).status);
     }
   }, [messages.all?.length, nodeId]);
 

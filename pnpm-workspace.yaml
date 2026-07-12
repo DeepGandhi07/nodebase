@@ -1,0 +1,18 @@
+# pnpm 11 blocks installing any package version published in the last 24h
+# by default (minimumReleaseAge). That's great for CI safety, but it breaks
+# --frozen-lockfile installs in Docker if your lockfile already pins a
+# package that's newer than the cutoff. Opting out here since this lockfile
+# is generated locally and trusted.
+minimumReleaseAge: 0
+
+# pnpm 11 also blocks install/postinstall scripts by default (strictDepBuilds).
+# These packages need their scripts to run (they download native binaries /
+# CLI tools) — all mainstream, well-known packages, so approving them.
+allowBuilds:
+  "@prisma/engines": true
+  "@sentry/cli": true
+  esbuild: true
+  inngest-cli: true
+  prisma: true
+  protobufjs: true
+  sharp: true

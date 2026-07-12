@@ -1,0 +1,39 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: postgresql://nodebase:nodebase@db:5432/nodebase
+    ports:
+      - "3000:3000"
+      - "5555:5555"
+    env_file:
+      - .env
+    environment:
+      # overrides the value from .env so the app talks to the "db" service, not localhost
+      DATABASE_URL: postgresql://nodebase:nodebase@db:5432/nodebase
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nodebase
+      POSTGRES_PASSWORD: nodebase
+      POSTGRES_DB: nodebase
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nodebase"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  db_data:

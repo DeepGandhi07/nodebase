@@ -183,6 +183,9 @@ importers:
       '@types/toposort':
         specifier: ^2.0.7
         version: 2.0.7
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       dotenv-cli:
         specifier: ^11.0.0
         version: 11.0.0

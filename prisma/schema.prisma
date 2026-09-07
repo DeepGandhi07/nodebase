@@ -95,6 +95,8 @@ enum CredentialType {
   OPENAI
   ANTHROPIC
   GEMINI
+  WHATSAPP
+  EMAIL
 }
 
 model Workflows {
@@ -124,6 +126,9 @@ enum NodeType {
   OPENAI
   DISCORD
   SLACK
+  EMAIL_TRIGGER
+  CONDITION
+  WHATSAPP
 }
 
 model Node {

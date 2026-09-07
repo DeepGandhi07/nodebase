@@ -7,10 +7,48 @@ import {
 } from "@/trpc/init";
 import z from "zod";
 import { PAGINATION } from "@/config/constants";
-import { NodeType } from "@/generated/prisma/client";
+import { NodeType, Prisma } from "@/generated/prisma/client";
 import { Node, Edge } from "@xyflow/react";
 import { inngest } from "@/inngest/client";
 import { sendWorkflowExecution } from "@/inngest/utils";
+import { CredentialType } from "@/generated/prisma/enums";
+import { decrypt } from "@/lib/encryption";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateObject } from "ai";
+import { TRPCError } from "@trpc/server";
+import {
+  generatedWorkflowSchema,
+  toWorkflowLayout,
+  WORKFLOW_GENERATION_SYSTEM_PROMPT,
+} from "../lib/workflow-generation";
+
+const CREDENTIAL_TYPE_BY_NODE_TYPE: Partial<Record<NodeType, CredentialType>> =
+  {
+    [NodeType.OPENAI]: CredentialType.OPENAI,
+    [NodeType.ANTHROPIC]: CredentialType.ANTHROPIC,
+    [NodeType.GEMINI]: CredentialType.GEMINI,
+    [NodeType.WHATSAPP]: CredentialType.WHATSAPP,
+    [NodeType.EMAIL_TRIGGER]: CredentialType.EMAIL,
+  };
+
+const GENERATION_MODELS = [
+  {
+    type: CredentialType.OPENAI,
+    model: (apiKey: string) => createOpenAI({ apiKey })("gpt-4o-mini"),
+  },
+  {
+    type: CredentialType.ANTHROPIC,
+    model: (apiKey: string) =>
+      createAnthropic({ apiKey })("claude-3-5-sonnet-latest"),
+  },
+  {
+    type: CredentialType.GEMINI,
+    model: (apiKey: string) =>
+      createGoogleGenerativeAI({ apiKey })("gemini-2.0-flash"),
+  },
+];
 
 export const workflowsRouter = createTRPCRouter({
   execute: protectedProcedure
@@ -26,6 +64,112 @@ export const workflowsRouter = createTRPCRouter({
       });
 
       return { workflow, runId: result.ids[0] };
+    }),
+
+  generate: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        prompt: z.string().min(1, "Describe the workflow you want"),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.auth.user.id;
+
+      await prisma.workflows.findUniqueOrThrow({
+        where: { id: input.id, userId },
+      });
+
+      const credentials = await prisma.credential.findMany({
+        where: { userId },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      const credentialByType = new Map(
+        credentials.map((credential) => [credential.type, credential]),
+      );
+
+      const generationProvider = GENERATION_MODELS.find((provider) =>
+        credentialByType.has(provider.type),
+      );
+
+      if (!generationProvider) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message:
+            "Add an OpenAI, Anthropic or Gemini credential before generating a workflow.",
+        });
+      }
+
+      const apiKey = decrypt(
+        credentialByType.get(generationProvider.type)!.value,
+      );
+
+      const { object } = await generateObject({
+        model: generationProvider.model(apiKey),
+        schema: generatedWorkflowSchema,
+        system: WORKFLOW_GENERATION_SYSTEM_PROMPT,
+        prompt: input.prompt,
+      });
+
+      const credentialIdByType: Partial<Record<NodeType, string>> = {};
+      for (const [nodeType, credentialType] of Object.entries(
+        CREDENTIAL_TYPE_BY_NODE_TYPE,
+      )) {
+        const credential = credentialByType.get(credentialType);
+        if (credential) {
+          credentialIdByType[nodeType as NodeType] = credential.id;
+        }
+      }
+
+      const layout = toWorkflowLayout(object, credentialIdByType);
+
+      await prisma.$transaction(async (tx) => {
+        await tx.node.deleteMany({ where: { workflowId: input.id } });
+
+        await tx.node.createMany({
+          data: layout.nodes.map((node) => ({
+            id: node.id,
+            workflowId: input.id,
+            name: node.type,
+            type: node.type,
+            position: node.position,
+            data: node.data as Prisma.InputJsonValue,
+          })),
+        });
+
+        await tx.connection.createMany({
+          data: layout.edges.map((edge) => ({
+            workflowId: input.id,
+            fromNodeId: edge.source,
+            toNodeId: edge.target,
+            fromOutput: edge.sourceHandle,
+            toInput: edge.targetHandle,
+          })),
+        });
+
+        await tx.workflows.update({
+          where: { id: input.id },
+          data: { updatedAt: new Date() },
+        });
+      });
+
+      const nodes: Node[] = layout.nodes.map((node) => ({
+        id: node.id,
+        type: node.type,
+        position: node.position,
+        data: node.data,
+      }));
+
+      const edges: Edge[] = layout.edges.map((edge) => ({
+        id: `${edge.source}-${edge.target}-${edge.sourceHandle}`,
+        source: edge.source,
+        target: edge.target,
+        sourceHandle: edge.sourceHandle,
+        targetHandle: edge.targetHandle,
+      }));
+
+      return { nodes, edges };
     }),
 
   create: premiumProcedure.mutation(({ ctx }) => {

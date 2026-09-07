@@ -1,6 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import { useReactFlow } from "@xyflow/react";
-import { GlobeIcon, MousePointerIcon } from "lucide-react";
+import { GlobeIcon, MailIcon, MousePointerIcon, SplitIcon } from "lucide-react";
 import { useCallback } from "react";
 import { toast } from "sonner";
 
@@ -42,6 +42,12 @@ const triggerNodes: NodeTypeOption[] = [
     description: "Runs the flow when a Stripe Event is captured",
     icon: "/logos/stripe.svg",
   },
+  {
+    type: NodeType.EMAIL_TRIGGER,
+    label: "Email",
+    description: "Runs the flow when an email is received",
+    icon: MailIcon,
+  },
 ];
 
 const executionNodes: NodeTypeOption[] = [
@@ -80,6 +86,18 @@ const executionNodes: NodeTypeOption[] = [
     label: "Slack",
     description: "Send a message to Slack",
     icon: "/logos/slack.svg",
+  },
+  {
+    type: NodeType.WHATSAPP,
+    label: "WhatsApp",
+    description: "Send a WhatsApp message via Twilio or Meta Cloud API",
+    icon: "/logos/whatsapp.svg",
+  },
+  {
+    type: NodeType.CONDITION,
+    label: "Condition",
+    description: "Branch the flow depending on a value",
+    icon: SplitIcon,
   },
 ];
 

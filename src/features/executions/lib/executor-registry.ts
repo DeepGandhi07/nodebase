@@ -1,3 +1,4 @@
+import { EmailTriggerExecutor } from "@/features/triggers/components/email-trigger/executor";
 import { GoogleFormTriggerExecutor } from "@/features/triggers/components/google-form-trigger/executor";
 import { manualTriggerExecutor } from "@/features/triggers/components/manual-trigger/executor";
 import { StripeTriggerExecutor } from "@/features/triggers/components/stripe-trigger/executor";
@@ -9,6 +10,8 @@ import { OpenAiExecutor } from "../components/openai/executor";
 import { AnthropicExecutor } from "../components/anthropic/executor";
 import { DiscordExecutor } from "../components/discord/executor";
 import { SlackExecutor } from "../components/slack/executor";
+import { ConditionExecutor } from "../components/condition/executor";
+import { WhatsappExecutor } from "../components/whatsapp/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
   [NodeType.INITIAL]: manualTriggerExecutor,
@@ -21,6 +24,9 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
   [NodeType.ANTHROPIC]: AnthropicExecutor,
   [NodeType.DISCORD]: DiscordExecutor,
   [NodeType.SLACK]: SlackExecutor,
+  [NodeType.EMAIL_TRIGGER]: EmailTriggerExecutor,
+  [NodeType.CONDITION]: ConditionExecutor,
+  [NodeType.WHATSAPP]: WhatsappExecutor,
 };
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

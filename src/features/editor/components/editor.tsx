@@ -26,6 +26,7 @@ import { ExecuteWorkflowButton } from "./execute-workflow-button";
 import { nodeComponents } from "@/config/node-components";
 import { useSetAtom } from "jotai";
 import { editorAtom } from "../store/atoms";
+import { GenerateWorkflowPanel } from "./generate-workflow-panel";
 
 export const EditorLoading = () => {
   return <LoadingView message="Loading editor..." />;
@@ -66,6 +67,19 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
     [],
   );
 
+  const handleGenerated = useCallback(
+    (workflow: { nodes: Node[]; edges: Edge[] }) => {
+      setNodes(
+        workflow.nodes.map((node) => ({
+          ...node,
+          data: { ...node.data, workflowId },
+        })),
+      );
+      setEdges(workflow.edges);
+    },
+    [workflowId],
+  );
+
   const hasManualTrigger = useMemo(() => {
     return nodes.some((node) => node.type === NodeType.MANUAL_TRIGGER);
   }, [nodes]);
@@ -92,6 +106,12 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         <MiniMap />
         <Panel position="top-right">
           <AddNodeButton />
+        </Panel>
+        <Panel position="top-left">
+          <GenerateWorkflowPanel
+            workflowId={workflowId}
+            onGenerated={handleGenerated}
+          />
         </Panel>
         {hasManualTrigger && (
           <Panel position="bottom-center">

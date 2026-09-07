@@ -1,5 +1,7 @@
 import { AnthropicChannel } from "@/inngest/channels/anthropic";
+import { conditionChannel } from "@/inngest/channels/condition";
 import { discordChannel } from "@/inngest/channels/discord";
+import { emailTriggerChannel } from "@/inngest/channels/email-trigger";
 import { geminiChannel } from "@/inngest/channels/gemini";
 import { googleFormTriggerChannel } from "@/inngest/channels/google-form-trigger";
 import type { httpRequestChannel } from "@/inngest/channels/http-request";
@@ -7,6 +9,7 @@ import type { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
 import { OpenAIChannel } from "@/inngest/channels/open-ai";
 import { SlackChannel } from "@/inngest/channels/slack";
 import { stripeTriggerChannel } from "@/inngest/channels/stripe-trigger";
+import { whatsappChannel } from "@/inngest/channels/whatsapp";
 import { GetStepTools, Inngest } from "inngest";
 
 type ChannelInstance<T extends (...args: any) => any> = ReturnType<T>;
@@ -29,6 +32,9 @@ export interface NodeExecutorParams<TData = Record<string, unknown>> {
   anthropicCh: ChannelInstance<typeof AnthropicChannel>;
   discordCh: ChannelInstance<typeof discordChannel>;
   slackCh: ChannelInstance<typeof SlackChannel>;
+  emailCh: ChannelInstance<typeof emailTriggerChannel>;
+  conditionCh: ChannelInstance<typeof conditionChannel>;
+  whatsappCh: ChannelInstance<typeof whatsappChannel>;
 }
 
 export type NodeExecutor<TData = Record<string, unknown>> = (

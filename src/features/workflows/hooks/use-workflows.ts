@@ -112,6 +112,28 @@ export const useUpdateWorkflow = () => {
 };
 
 /**
+ * Hook to generate a workflow from a natural-language prompt
+ */
+export const useGenerateWorkflow = () => {
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
+
+  return useMutation(
+    trpc.workflows.generate.mutationOptions({
+      onSuccess: (_data, variables) => {
+        toast.success("Workflow generated");
+        queryClient.invalidateQueries(
+          trpc.workflows.getOne.queryOptions({ id: variables.id }),
+        );
+      },
+      onError: (error) => {
+        toast.error(`Failed to generate workflow: ${error.message}`);
+      },
+    }),
+  );
+};
+
+/**
  * Hook to execute a workflow
  */
 export const useExecuteWorkflow = () => {
